@@ -115,7 +115,6 @@ module parabola(
             last_col +  y      * size_x + size_ppoints
         ]
     ];
-
     polyhedron(
         points = concat( parabola_points, base_points ), 
         faces  = concat( parabola_faces, 
@@ -134,7 +133,7 @@ module parabola(
 width = 75;
 height = 20;
 center_hole_width = 30;
-focus_point = [75, 75, 100];
+focus_point = [90, 90, 100];
 
 
 
@@ -142,13 +141,12 @@ focus_point = [75, 75, 100];
 // difference() {
     // difference() {
         translate([0, 0, -0.001]) cylinder(r=width/2, h=height);
-        translate([-width, -width, height]) {
-        parabola( 
-            focus_point = focus_point,
-            base_area   = [width*2,width*2],
-            resolution = [100, 100], 
-            thickness   = 20
-        );
+        translate([-focus_point.x, -focus_point.y, 0]) {
+            parabola( 
+                focus_point = focus_point,
+                base_area   = [focus_point.x*2,focus_point.y*2], // needs to be focus point, x, y * 2 
+                thickness   = 1
+            );
         }; 
     // };
     // translate([0, 0, -0.01]) cylinder(r=30, h=height+0.001);
