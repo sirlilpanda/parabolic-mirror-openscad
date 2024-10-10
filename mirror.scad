@@ -1,12 +1,12 @@
 focus_point_x = 0.0;
 focus_point_y = 0.0;
-focus_point_z = 50.0;
+focus_point_z = 200.0;
 width = 110.0;
-height = 10.0;
+height = 22.0;
 rim = 15.0;
-mounting_hole_pos_tweak = 2.0;
+mounting_hole_pos_tweak = -2.0;
 center_hole_width = 30.0;
-rim_height = 20.0;
+rim_height = 23.0;
 focus_point_debug = true;
 /*
     parabola module
