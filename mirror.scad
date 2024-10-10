@@ -1,5 +1,13 @@
-
-
+focus_point_x = 0.0;
+focus_point_y = 0.0;
+focus_point_z = 50.0;
+width = 110.0;
+height = 10.0;
+rim = 15.0;
+mounting_hole_pos_tweak = 2.0;
+center_hole_width = 30.0;
+rim_height = 20.0;
+focus_point_debug = true;
 /*
     parabola module
     
@@ -115,6 +123,7 @@ module parabola(
             last_col +  y      * size_x + size_ppoints
         ]
     ];
+    // translate(parabola_point( focus_point, [x,y,0] ) )
     polyhedron(
         points = concat( parabola_points, base_points ), 
         faces  = concat( parabola_faces, 
@@ -129,25 +138,105 @@ module parabola(
 }
 
 
+module mirror(
+    width, 
+    height, 
+    focus_point = [0, 0, 500], 
+    draw_focus_point = true, 
+    center_hole_width = 30, 
+    rim = 1,
+    rim_height = height,
+    base_thickness=4, 
+    number_mounting_holes = 3, 
+    mounting_hole_size = 6,
+    mounting_hole_pos_tweak = 0,
+    holding_holes_amount = 3,
+    holding_holes_diameter = width/2,
+    ) {
+    thickness = 100;
 
-width = 75;
-height = 20;
-center_hole_width = 30;
-focus_point = [90, 90, 100];
+    real_focus_point = focus_point + [width, width, 0];
+
+        if (draw_focus_point){
+            color("red", 1)
+            translate([-width, -width, 0])
+            translate(real_focus_point)
+            sphere(5);
+        }
+
+    rot_amount = 360/number_mounting_holes;
+
+    difference(){
+        difference() {
+            difference() {
+                union() { // rim
+                    difference(){
+                        color("blue", 1)
+                        translate([0, 0, -0.001]) cylinder(r=width/2+rim, h=rim_height+0.01);
+                        translate([0, 0, -0.01]) cylinder(r=width/2, h=rim_height*2);
+                    }
+                    // filler underneath
+                    cylinder(r=width/2, h=rim+0.01);
+
+                    // // mirror
+                    translate([0, 0, rim]) 
+                    difference() {
+                        // mirror shape
+                        translate([0, 0, -0.001]) cylinder(r=width/2, h=height+real_focus_point.z*real_focus_point.z-real_focus_point.z/2);
+                        // mirror suface
+                        translate([-width, -width, real_focus_point.z*real_focus_point.z-real_focus_point.z/2]) {
+                            parabola( 
+                                focus_point = real_focus_point,
+                                base_area   = [width*2,width * 2], // needs to be focus point, x, y * 2 
+                                thickness   = real_focus_point.z*real_focus_point.z,
+                                resolution = [100, 100]
+                            );
+                        }; 
+                    }    
+                }
+                // middle hole
+                translate([0, 0, -rim-1]) cylinder(d=center_hole_width, h=real_focus_point.z*real_focus_point.z);
+            }
+            // mounting holes
+            for (i=[1:number_mounting_holes]) {
+                color("blue", 1)
+                rotate(rot_amount*i, [0, 0, 1])
+                translate([0, (width+rim)/2+mounting_hole_pos_tweak, -rim/2])
+                cylinder(d=mounting_hole_size, real_focus_point.z*3);
+            }
+        }
+    // cuts off everything above to keep the model clean
+    color("gold", 1)
+    translate([-width, -width, height])
+    scale([1, 1, real_focus_point.z*real_focus_point.z]) 
+        cube(width*2);
+    }
+}
+
+
+
+
+mirror(
+    width, 
+    height, 
+    rim=rim, 
+    rim_height = rim_height,
+    draw_focus_point = focus_point_debug,
+    center_hole_width = center_hole_width, 
+    focus_point = [focus_point_x, focus_point_y, focus_point_z],
+    mounting_hole_pos_tweak = mounting_hole_pos_tweak
+    );
+
+// width = 75;
+// height = 20;
+// center_hole_width = 30;
+// focus_point = [90, 90, 100];
 
 
 
 
 // difference() {
     // difference() {
-        translate([0, 0, -0.001]) cylinder(r=width/2, h=height);
-        translate([-focus_point.x, -focus_point.y, 0]) {
-            parabola( 
-                focus_point = focus_point,
-                base_area   = [focus_point.x*2,focus_point.y*2], // needs to be focus point, x, y * 2 
-                thickness   = 1
-            );
-        }; 
     // };
     // translate([0, 0, -0.01]) cylinder(r=30, h=height+0.001);
 // }
@@ -162,3 +251,4 @@ focus_point = [90, 90, 100];
 //     };
 //     sphere(8);
 // } // cube and sphere
+
